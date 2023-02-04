@@ -98,12 +98,14 @@ public class AuthController {
         System.out.println("\n\n\n\n\n\nauthorize = " + authorize);
         return new RedirectView(authorize);
     }
+
     @RequestMapping(value = "/oauth", method = RequestMethod.GET, params = "code")
-    public String oauth2Callback(@RequestParam(value = "code") String code) {
+    public ResponseEntity<?> oauth2Callback(@RequestParam(value = "code") String code) {
         String s = authService.extractAccessToken(code);
-        System.out.println("\n\n\n\n\n\n\n\n"+s);
-        return "Ketmon ketmon";
+
+        return ResponseEntity.status(200).body(new ApiResponse<>("Succes", true, s));
     }
+
     @RequestMapping(value = "/refreshToken", method = RequestMethod.GET)
     public ResponseEntity<String> refreshToken() {
         String response = authService.getNewAccessTokenUsingRefreshToken();
@@ -111,7 +113,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity me(@CurrentUser User user){
+    public ResponseEntity me(@CurrentUser User user) {
         System.out.println("user = " + user);
         return ResponseEntity.ok(user);
     }

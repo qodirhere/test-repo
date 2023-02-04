@@ -20,6 +20,7 @@ spring:
       client:
         registration:
           google:
+            
             clientId: 469473465321-o4s43ejrh8nb1h2q509477lqdasa7ai1.apps.googleusercontent.com
             clientSecret: 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
             redirect-uri: https://meinarzt-app-production.up.railway.app/oauth
