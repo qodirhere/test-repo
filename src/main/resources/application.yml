@@ -1,0 +1,51 @@
+spring:
+  sql:
+    init:
+      mode: always
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: root123
+    url: jdbc:postgresql://localhost:5432/oauth2
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            clientId: 469473465321-o4s43ejrh8nb1h2q509477lqdasa7ai1.apps.googleusercontent.com
+            clientSecret: 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
+            redirect-uri: http://localhost:8080/oauth
+            scope:
+              -email,profile,https://www.googleapis.com/auth/calendar
+#          github:
+#            clientId: 5a755813c9b334ba8b44
+#            clientSecret: 89b524e1025660384803532cbaf7a4ccb0d4e1f0
+#          facebook:
+#            clientId: 954299771925648
+#            clientSecret: 998488e512650b8c76c2628ad02bfc2c
+app:
+  auth:
+    tokenSecret: 04ca023b39512e46d0c2cf4b48d5aac61d34302994c87ed4eff225dcf3b0a218739f3897051a057f9b846a69ea2927a587044164b7bae5e1306219d50b588cb1
+    tokenExpirationMsec: 864000000
+  cors:
+    allowedOrigins: http://localhost:3000 # Comma separated list of allowed origins
+  oauth2:
+    # After successfully authenticating with the OAuth2 Provider,
+    # we'll be generating an auth token for the user and sending the token to the
+    # redirectUri mentioned by the client in the /oauth2/authorize request.
+    # We're not using cookies because they won't work well in mobile clients.
+    authorizedRedirectUris:
+#      - http://localhost:3000/oauth2/redirect
+#      - myandroidapp://oauth2/redirect
+#      - myiosapp://oauth2/redirect
+springdoc:
+  swagger-ui:
+    path: /swagger-ui
+    enabled: true
+  api-docs:
+    path: /api-docs
