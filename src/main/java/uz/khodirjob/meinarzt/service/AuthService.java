@@ -17,22 +17,35 @@ import com.google.api.services.oauth2.Oauth2Scopes;
 import com.google.api.services.oauth2.model.Userinfo;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import uz.khodirjob.meinarzt.entity.AuthProvider;
 import uz.khodirjob.meinarzt.entity.User;
+import uz.khodirjob.meinarzt.payload.ApiResponse;
+import uz.khodirjob.meinarzt.payload.SignUpRequest;
+import uz.khodirjob.meinarzt.repository.UserRepository;
 import uz.khodirjob.meinarzt.service.UserService;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    private final PasswordEncoder passwordEncoder;
+
+    private final UserRepository userRepository;
+
 
     private static HttpTransport httpTransport;
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
@@ -148,4 +161,21 @@ public class AuthService {
                 .compact();
     }
 
+    public ApiResponse<String> registerUser(SignUpRequest signUpRequest) {
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            return new ApiResponse<>("This user already exists", false);
+        }
+        User user = new User();
+        user.setFirstName(signUpRequest.getFirstName());
+        user.setEmail(signUpRequest.getEmail());
+        user.setPassword(signUpRequest.getPassword());
+        user.setProvider(AuthProvider.local);
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        User result = userRepository.save(user);
+
+        String token = generateToken(result);
+        return new ApiResponse<>("Succes", true, token);
+    }
 }

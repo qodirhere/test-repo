@@ -1,11 +1,11 @@
 spring:
   sql:
     init:
-      mode: always
+      mode: never
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
   datasource:
     driver-class-name: org.postgresql.Driver
     username: postgres
@@ -17,8 +17,10 @@ spring:
       client:
         registration:
           google:
-            clientId: 469473465321-o4s43ejrh8nb1h2q509477lqdasa7ai1.apps.googleusercontent.com
-            clientSecret: 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
+            clientId: 469473465321-di07cls2e3vdpbpaou855g87879206ff.apps.googleusercontent.com
+            clientSecret: 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
+#            clientId: 469473465321-o4s43ejrh8nb1h2q509477lqdasa7ai1.apps.googleusercontent.com
+#            clientSecret: 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
             redirect-uri: http://localhost:8080/oauth
             scope:
               -email,profile,https://www.googleapis.com/auth/calendar

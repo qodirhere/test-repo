@@ -14,6 +14,7 @@ import uz.khodirjob.meinarzt.dto.CreateEventRequestDTO;
 import uz.khodirjob.meinarzt.entity.User;
 import uz.khodirjob.meinarzt.exception.ResourceNotFoundException;
 import uz.khodirjob.meinarzt.payload.ApiResponse;
+import uz.khodirjob.meinarzt.repository.EventRepository;
 import uz.khodirjob.meinarzt.repository.UserRepository;
 import uz.khodirjob.meinarzt.security.UserPrincipal;
 
@@ -26,6 +27,10 @@ public class CalendarService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EventRepository eventRepository;
+
     private static HttpTransport httpTransport;
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final String APPLICATION_NAME = "GoogleCalendar";
@@ -109,13 +114,13 @@ public class CalendarService {
                     .setDescription(createEventRequestDTO.getDescription());
 
 
-            DateTime startDateTime = new DateTime(createEventRequestDTO.getStartDate());
+            DateTime startDateTime = createEventRequestDTO.getStartDateTime();
             EventDateTime start = new EventDateTime()
                     .setDateTime(startDateTime)
                     .setTimeZone(createEventRequestDTO.getTimezone());
             event.setStart(start);
 
-            DateTime endDateTime = new DateTime(createEventRequestDTO.getEndDate());
+            DateTime endDateTime = createEventRequestDTO.getEndDateTime();
             EventDateTime end = new EventDateTime()
                     .setDateTime(endDateTime)
                     .setTimeZone(createEventRequestDTO.getTimezone());
@@ -151,5 +156,31 @@ public class CalendarService {
         }
     }
 
+    public ApiResponse<String> cretaeEvent(CreateEventRequestDTO createEventRequestDTO) {
+        uz.khodirjob.meinarzt.entity.Event event = new uz.khodirjob.meinarzt.entity.Event();
+        event.setDescription(createEventRequestDTO.getDescription());
+        event.setLocation(createEventRequestDTO.getLocation());
+        event.setSummary(createEventRequestDTO.getSummary());
+        event.setStartDateTime(createEventRequestDTO.getStartDateTime());
+        event.setEndDateTime(createEventRequestDTO.getEndDateTime());
+        event.setGoogleMeetUrl(createEventRequestDTO.getMeetUrl());
+        event.setTimezone(createEventRequestDTO.getTimezone());
 
+        Set<User> attendees = new HashSet<>();
+
+        for (String guest : createEventRequestDTO.getGuests()) {
+            Optional<User> byEmail = userRepository.findByEmail(guest);
+            byEmail.ifPresent(attendees::add);
+        }
+        eventRepository.save(event);
+
+        return new ApiResponse<>("Succes", true);
+    }
+
+    public ApiResponse<?> getEvents(String startDate, String endDate, UserPrincipal userPrincipal) {
+        final DateTime startDateTime = new DateTime(startDate + "T00:00:00");
+        final DateTime endDateTime = new DateTime(endDate + "T23:59:59");
+        List<uz.khodirjob.meinarzt.entity.Event> all = eventRepository.findAll();
+        return new ApiResponse<>("This events", true, all);
+    }
 }

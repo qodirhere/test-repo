@@ -74,7 +74,7 @@ public class DataLoader implements CommandLineRunner {
             user.setGender(true);
             user.setRoles(save3);
             user.setProvider(AuthProvider.local);
-            user.setName("khodir");
+            user.setFirstName("khodir");
             userRepository.save(user);
 
             User user1 = new User();
@@ -84,7 +84,7 @@ public class DataLoader implements CommandLineRunner {
             user1.setGender(true);
             user1.setRoles(save1);
             user1.setProvider(AuthProvider.local);
-            user1.setName("khodir");
+            user1.setFirstName("khodir");
             userRepository.save(user1);
 
 
@@ -95,7 +95,7 @@ public class DataLoader implements CommandLineRunner {
             user2.setGender(true);
             user2.setRoles(save2);
             user2.setProvider(AuthProvider.local);
-            user2.setName("khodir");
+            user2.setFirstName("khodir");
             userRepository.save(user2);
 
 

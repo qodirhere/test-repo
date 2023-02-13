@@ -23,32 +23,4 @@ public class UserController {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userPrincipal.getId()));
     }
 
-    @GetMapping("/ketmon/1")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public String admin(){
-        return "Bu ROLE_ADMIN";
-    }
-
-    @GetMapping("/ketmon")
-    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
-    public String ketmon(){
-        return "Bu ROLE_SUPER_ADMIN";
-    }
-
-    @GetMapping("/ketmonn")
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
-    public String ketmonn(){
-        return "Bu ROLE_SUPER_ADMIN, ROLE_ADMIN";
-    }
-
-    @GetMapping("/ketmonm")
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_USER')")
-    public String ketmonm(){
-        return "Bu ROLE_SUPER_ADMIN, ROLE_ADMIN";
-    }
-
-
-
-
-
 }

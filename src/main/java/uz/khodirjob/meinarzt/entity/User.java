@@ -23,11 +23,10 @@ public class User {
     private Long id;
 
     @Column(nullable = false)
-    private String name;
+    private String firstName;
 
     private String lastName;
 
-    private String firstName;
 
     @Email
     @Column(nullable = false)

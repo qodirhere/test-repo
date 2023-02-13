@@ -18,13 +18,13 @@ import java.util.Set;
 @Data
 @EntityListeners(AuditingEntityListener.class)
 public class Event extends AbsEntity {
-    private String title;
+    private String summary;
+    private String location;
     private String description;
     private String googleMeetUrl;
-    private DateTime startTime;
-    private DateTime endTime;
-    private String fileUrl;
+    private DateTime startDateTime;
+    private DateTime endDateTime;
+    private String timezone; //America/Los_Angele
     @OneToMany
     private Set<User> attendees;
-    private Boolean owner;
 }

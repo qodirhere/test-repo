@@ -37,8 +37,6 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private TokenProvider tokenProvider;
@@ -64,32 +62,12 @@ public class AuthController {
     }
 
     @PostMapping("/auth/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) throws Exception {
-        System.out.println("\n\n\nKetmon Ketmon Ketmon Ketmon Ketmon");
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            throw new BadRequestException("Email address already in use.");
-        }
-
+    public ResponseEntity<?> registerUser(@RequestBody SignUpRequest signUpRequest) throws Exception {
         String authorize = authService.authorize();
-        System.out.println("\n\n\nauthorize = " + authorize);
 
-        // Creating user's account
-        User user = new User();
-        user.setName(signUpRequest.getName());
-        user.setEmail(signUpRequest.getEmail());
-        user.setPassword(signUpRequest.getPassword());
-        user.setProvider(AuthProvider.local);
+        var response = authService.registerUser(signUpRequest);
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        User result = userRepository.save(user);
-
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentContextPath().path("/user/me")
-                .buildAndExpand(result.getId()).toUri();
-
-        return ResponseEntity.created(location)
-                .body(new ApiResponse("User registered successfully@", true));
+        return ResponseEntity.status(response.isSuccess() ? 200 : 401).body(response);
     }
 
     @RequestMapping(value = "/oauth", method = RequestMethod.GET)

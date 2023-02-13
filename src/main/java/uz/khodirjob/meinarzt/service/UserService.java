@@ -37,7 +37,7 @@ public class UserService {
             user = byEmail.get();
         }
         user.setEmail(userInfo.getEmail());
-        user.setName(userInfo.getName());
+        user.setFirstName(userInfo.getName());
         user.setEmailVerified(userInfo.getVerifiedEmail());
         user.setImageUrl(userInfo.getPicture());
         user.setProvider(AuthProvider.google);
