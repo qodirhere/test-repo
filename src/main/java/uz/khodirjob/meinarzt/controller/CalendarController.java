@@ -25,8 +25,8 @@ public class CalendarController {
 
     @GetMapping(value = "/events")
     public ResponseEntity<?> fetchCalendarEvent(@RequestParam(value = "startDate") String startDate, @RequestParam(value = "endDate") String endDate, @CurrentUser UserPrincipal userPrincipal) {
-        var response = calendarService.getEvents(startDate, endDate, userPrincipal);
-//        var response = calendarService.fetchCalendarEvents(startDate, endDate, null, userPrincipal);
+//        var response = calendarService.getEvents(startDate, endDate, userPrincipal);
+        var response = calendarService.fetchCalendarEvents(startDate, endDate, null, userPrincipal);
         return ResponseEntity.status(200).body(response);
     }
 
