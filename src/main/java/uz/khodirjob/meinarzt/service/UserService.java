@@ -8,6 +8,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import uz.khodirjob.meinarzt.entity.AuthProvider;
 import uz.khodirjob.meinarzt.entity.User;
+import uz.khodirjob.meinarzt.entity.enums.RoleEnum;
+import uz.khodirjob.meinarzt.repository.RoleRepository;
 import uz.khodirjob.meinarzt.repository.UserRepository;
 
 import java.util.Optional;
@@ -20,6 +22,9 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     /**
      * Save user information in DB
@@ -44,6 +49,7 @@ public class UserService {
         user.setProviderId(userInfo.getId());
         user.setAccessToken(tokenResponse.getAccessToken());
         user.setRefreshToken(tokenResponse.getRefreshToken());
+        user.setRoles(roleRepository.findByName(RoleEnum.ROLE_USER).get());
 //        user.setGender();
         System.out.println("userInfo.getGender() = " + userInfo.getGender());
         System.out.println("userInfo.toString() = " + userInfo.toString());
