@@ -15,8 +15,8 @@ public class CreateEventRequestDTO {
     private String summary;
     private String location;
     private String description;
-    private DateTime startDateTime;
-    private DateTime endDateTime;
+    private String startDateTime;
+    private String endDateTime;
     private String timezone; //America/Los_Angele
     private List<String> guests;
     private String meetUrl;

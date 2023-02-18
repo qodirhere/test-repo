@@ -25,8 +25,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import uz.khodirjob.meinarzt.entity.AuthProvider;
 import uz.khodirjob.meinarzt.entity.User;
+import uz.khodirjob.meinarzt.entity.enums.RoleEnum;
 import uz.khodirjob.meinarzt.payload.ApiResponse;
 import uz.khodirjob.meinarzt.payload.SignUpRequest;
+import uz.khodirjob.meinarzt.repository.RoleRepository;
 import uz.khodirjob.meinarzt.repository.UserRepository;
 import uz.khodirjob.meinarzt.service.UserService;
 
@@ -45,6 +47,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     private final UserRepository userRepository;
+
+    private final RoleRepository roleRepository;
 
 
     private static HttpTransport httpTransport;
@@ -170,7 +174,7 @@ public class AuthService {
         user.setEmail(signUpRequest.getEmail());
         user.setPassword(signUpRequest.getPassword());
         user.setProvider(AuthProvider.local);
-
+        user.setRoles(roleRepository.findByName(RoleEnum.ROLE_USER).get());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         User result = userRepository.save(user);

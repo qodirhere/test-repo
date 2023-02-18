@@ -9,6 +9,7 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import uz.khodirjob.meinarzt.dto.CreateEventRequestDTO;
 import uz.khodirjob.meinarzt.entity.User;
@@ -17,16 +18,19 @@ import uz.khodirjob.meinarzt.payload.ApiResponse;
 import uz.khodirjob.meinarzt.repository.EventRepository;
 import uz.khodirjob.meinarzt.repository.UserRepository;
 import uz.khodirjob.meinarzt.security.UserPrincipal;
-
+//import uz.khodirjob.meinarzt.entity.Event;
+import java.sql.Timestamp;
 import java.util.*;
 
 @Service
 public class CalendarService {
+
     @Autowired
     private UserService userService;
 
     @Autowired
     private UserRepository userRepository;
+
 
     @Autowired
     private EventRepository eventRepository;
@@ -46,23 +50,24 @@ public class CalendarService {
      * @param userPrincipal
      * @return
      */
-    public ApiResponse<?> fetchCalendarEvents(String startDate, String endDate, String search, UserPrincipal userPrincipal) {
+    public ApiResponse<?> fetchCalendarEvents(String startDate, String endDate, String search) {
+
+        User currentUser = userService.getCurrentUser();
+        if (currentUser == null) {
+            return new ApiResponse<>("User not found", false);
+        }
 
         Set<uz.khodirjob.meinarzt.entity.Event> eventSet = new HashSet<>();
         Events eventList = null;
         Set<User> userSet = new HashSet<>();
-        Optional<User> byId = userRepository.findById(userPrincipal.getId());
-        String token = null;
-        User currentUser = null;
-        if (byId.isPresent()) {
-            currentUser = byId.get();
-            token = currentUser.getAccessToken();
-        }
+        String token = currentUser.getAccessToken();
+
         try {
             GoogleCredential credential = new GoogleCredential().setAccessToken(token);
 
             final DateTime startDateTime = new DateTime(startDate + "T00:00:00");
             final DateTime endDateTime = new DateTime(endDate + "T23:59:59");
+
 
             httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             client = new Calendar.Builder(httpTransport, JSON_FACTORY, credential)
@@ -99,9 +104,10 @@ public class CalendarService {
      * @param createEventRequestDTO
      * @return
      */
-    public String createGoogleCalendarEvent(UserPrincipal userPrincipal, CreateEventRequestDTO createEventRequestDTO) {
+    public String createGoogleCalendarEvent(CreateEventRequestDTO createEventRequestDTO) {
         try {
-            String token = userRepository.findById(userPrincipal.getId()).orElseThrow(() -> new ResourceNotFoundException("User", "id", userPrincipal.getId())).getAccessToken();
+            String token = userService.getCurrentUser().getAccessToken();
+
             System.out.println(token);
             GoogleCredential credential = new GoogleCredential().setAccessToken(token);
             httpTransport = GoogleNetHttpTransport.newTrustedTransport();
@@ -114,13 +120,13 @@ public class CalendarService {
                     .setDescription(createEventRequestDTO.getDescription());
 
 
-            DateTime startDateTime = createEventRequestDTO.getStartDateTime();
+            DateTime startDateTime = new DateTime(createEventRequestDTO.getStartDateTime());
             EventDateTime start = new EventDateTime()
                     .setDateTime(startDateTime)
                     .setTimeZone(createEventRequestDTO.getTimezone());
             event.setStart(start);
 
-            DateTime endDateTime = createEventRequestDTO.getEndDateTime();
+            DateTime endDateTime = new DateTime(createEventRequestDTO.getEndDateTime());
             EventDateTime end = new EventDateTime()
                     .setDateTime(endDateTime)
                     .setTimeZone(createEventRequestDTO.getTimezone());
@@ -161,8 +167,9 @@ public class CalendarService {
         event.setDescription(createEventRequestDTO.getDescription());
         event.setLocation(createEventRequestDTO.getLocation());
         event.setSummary(createEventRequestDTO.getSummary());
-        event.setStartDateTime(createEventRequestDTO.getStartDateTime());
-        event.setEndDateTime(createEventRequestDTO.getEndDateTime());
+        event.setStartTime(new Timestamp(new DateTime(createEventRequestDTO.getStartDateTime()).getValue()));
+        event.setEndTime(new Timestamp(new DateTime(createEventRequestDTO.getStartDateTime()).getValue()));
+//        event.setEndDateTime(new DateTime(createEventRequestDTO.getEndDateTime()));
         event.setGoogleMeetUrl(createEventRequestDTO.getMeetUrl());
         event.setTimezone(createEventRequestDTO.getTimezone());
 
@@ -172,15 +179,16 @@ public class CalendarService {
             Optional<User> byEmail = userRepository.findByEmail(guest);
             byEmail.ifPresent(attendees::add);
         }
+        event.setAttendees(attendees);
         eventRepository.save(event);
 
         return new ApiResponse<>("Succes", true);
     }
 
-    public ApiResponse<?> getEvents(String startDate, String endDate, UserPrincipal userPrincipal) {
-        final DateTime startDateTime = new DateTime(startDate + "T00:00:00");
-        final DateTime endDateTime = new DateTime(endDate + "T23:59:59");
-        List<uz.khodirjob.meinarzt.entity.Event> all = eventRepository.findAll();
-        return new ApiResponse<>("This events", true, all);
+    public ApiResponse<?> getEvents(String year, String month) {
+        Timestamp startTime = Timestamp.valueOf( year.trim()+"-"+month.trim()+"-01 00:00:00.000000000");
+        Timestamp endTime = Timestamp.valueOf( year.trim()+"-"+month.trim()+"-31 00:00:00.000000000");
+        List<uz.khodirjob.meinarzt.entity.Event> events = eventRepository.getEvents(userService.getCurrentUser().getId(), startTime, endTime);
+        return new ApiResponse<>("This events", true, events);
     }
 }

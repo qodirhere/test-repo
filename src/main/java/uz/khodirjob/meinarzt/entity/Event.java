@@ -9,7 +9,9 @@ import uz.khodirjob.meinarzt.entity.template.AbsEntity;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import java.sql.Timestamp;
 import java.util.Set;
 
 @Entity
@@ -22,9 +24,9 @@ public class Event extends AbsEntity {
     private String location;
     private String description;
     private String googleMeetUrl;
-    private DateTime startDateTime;
-    private DateTime endDateTime;
+    private Timestamp startTime;
+    private Timestamp endTime;
     private String timezone; //America/Los_Angele
-    @OneToMany
+    @ManyToMany
     private Set<User> attendees;
 }

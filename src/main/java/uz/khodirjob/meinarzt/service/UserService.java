@@ -4,6 +4,8 @@ package uz.khodirjob.meinarzt.service;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.services.oauth2.model.Userinfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import uz.khodirjob.meinarzt.entity.AuthProvider;
@@ -60,12 +62,12 @@ public class UserService {
     }
 
     public User getCurrentUser() {
-        try {
-            return userRepository.findById(1l).get();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("authentication.toString() = " + authentication.toString());
+        String currentPrincipalName = authentication.getName();
+        System.out.println("currentPrincipalName = " + currentPrincipalName);
+        Optional<User> byEmail = userRepository.findByEmail(currentPrincipalName);
+        return byEmail.orElse(null);
     }
 
     public User saveUser(User user) {

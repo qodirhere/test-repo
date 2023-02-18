@@ -21,6 +21,7 @@ import uz.khodirjob.meinarzt.payload.SignUpRequest;
 import uz.khodirjob.meinarzt.repository.UserRepository;
 import uz.khodirjob.meinarzt.security.CurrentUser;
 import uz.khodirjob.meinarzt.security.TokenProvider;
+import uz.khodirjob.meinarzt.security.UserPrincipal;
 import uz.khodirjob.meinarzt.service.AuthService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -91,8 +92,14 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity me(@CurrentUser User user) {
+    public ResponseEntity me(@CurrentUser UserPrincipal user) {
         System.out.println("user = " + user);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("authentication.toString() = " + authentication.toString());
+        String currentPrincipalName = authentication.getName();
+        System.out.println("currentPrincipalName = " + currentPrincipalName);
+
         return ResponseEntity.ok(user);
     }
 }
