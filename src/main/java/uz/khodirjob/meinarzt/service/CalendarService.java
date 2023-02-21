@@ -9,15 +9,12 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import uz.khodirjob.meinarzt.dto.CreateEventRequestDTO;
 import uz.khodirjob.meinarzt.entity.User;
-import uz.khodirjob.meinarzt.exception.ResourceNotFoundException;
 import uz.khodirjob.meinarzt.payload.ApiResponse;
 import uz.khodirjob.meinarzt.repository.EventRepository;
 import uz.khodirjob.meinarzt.repository.UserRepository;
-import uz.khodirjob.meinarzt.security.UserPrincipal;
 //import uz.khodirjob.meinarzt.entity.Event;
 import java.sql.Timestamp;
 import java.util.*;
@@ -135,9 +132,7 @@ public class CalendarService {
             event.setLocked(true);
 
             List<EventAttendee> eventAttendees = new ArrayList<>();
-            for (String guest : createEventRequestDTO.getGuests()) {
-                eventAttendees.add(new EventAttendee().setEmail(guest));
-            }
+            eventAttendees.add(new EventAttendee().setEmail(createEventRequestDTO.getAttendees()));
 
             event.setAttendees(eventAttendees);
 
@@ -162,32 +157,36 @@ public class CalendarService {
         }
     }
 
-    public ApiResponse<String> cretaeEvent(CreateEventRequestDTO createEventRequestDTO) {
+    public ApiResponse<?> cretaeEvent(CreateEventRequestDTO createEventRequestDTO) {
+        Optional<User> byEmail = userRepository.findByEmail(createEventRequestDTO.getAttendees());
+        if (byEmail.isEmpty()) {
+            return new ApiResponse<>(createEventRequestDTO.getAttendees() + " user not found", false);
+        }
         uz.khodirjob.meinarzt.entity.Event event = new uz.khodirjob.meinarzt.entity.Event();
         event.setDescription(createEventRequestDTO.getDescription());
         event.setLocation(createEventRequestDTO.getLocation());
         event.setSummary(createEventRequestDTO.getSummary());
         event.setStartTime(new Timestamp(new DateTime(createEventRequestDTO.getStartDateTime()).getValue()));
         event.setEndTime(new Timestamp(new DateTime(createEventRequestDTO.getStartDateTime()).getValue()));
-//        event.setEndDateTime(new DateTime(createEventRequestDTO.getEndDateTime()));
         event.setGoogleMeetUrl(createEventRequestDTO.getMeetUrl());
         event.setTimezone(createEventRequestDTO.getTimezone());
-
-        Set<User> attendees = new HashSet<>();
-
-        for (String guest : createEventRequestDTO.getGuests()) {
-            Optional<User> byEmail = userRepository.findByEmail(guest);
-            byEmail.ifPresent(attendees::add);
-        }
-        event.setAttendees(attendees);
-        eventRepository.save(event);
-
-        return new ApiResponse<>("Succes", true);
+        event.setAttendees(byEmail.get());
+        event.setOwner(userService.getCurrentUser());
+        uz.khodirjob.meinarzt.entity.Event save = eventRepository.save(event);
+        return new ApiResponse<>("Succes", true, save);
     }
 
-    public ApiResponse<?> getEvents(String year, String month) {
-        Timestamp startTime = Timestamp.valueOf( year.trim()+"-"+month.trim()+"-01 00:00:00.000000000");
-        Timestamp endTime = Timestamp.valueOf( year.trim()+"-"+month.trim()+"-31 00:00:00.000000000");
+    public ApiResponse<?> getYearlyEvents(Integer year) {
+        Long id = userService.getCurrentUser().getId();
+        Timestamp startTime = Timestamp.valueOf(year + "-01-01 00:00:00.000000000");
+        Timestamp endTime = Timestamp.valueOf(year + "-12-31 24:59:59.000000000");
+        List<uz.khodirjob.meinarzt.entity.Event> events = eventRepository.getEvents(userService.getCurrentUser().getId(), startTime, endTime);
+        return new ApiResponse<>("This events", true, events);
+    }
+
+    public ApiResponse<?> getEventsDay(Integer year, Integer month, Integer day) {
+        Timestamp startTime = Timestamp.valueOf(year + "-" + month + "-" + day + " 00:00:00.000000000");
+        Timestamp endTime = Timestamp.valueOf(year + "-" + month + "-" + (day + 1) + " 00:00:00.000000000");
         List<uz.khodirjob.meinarzt.entity.Event> events = eventRepository.getEvents(userService.getCurrentUser().getId(), startTime, endTime);
         return new ApiResponse<>("This events", true, events);
     }

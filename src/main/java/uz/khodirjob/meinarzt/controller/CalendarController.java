@@ -24,20 +24,28 @@ public class CalendarController {
     @Autowired
     private CalendarService calendarService;
 
-    @GetMapping(value = "/events")
+    @GetMapping(value = "/yearlyEvents")
     @PreAuthorize(value = "hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public ResponseEntity<?> fetchCalendarEvent(@RequestParam(value = "year") String year, @RequestParam(value = "month") String month) {
-        var response1 = calendarService.getEvents(year, month);
+    public ResponseEntity<?> fetchCalendarEvent(@RequestParam(value = "year") Integer year) {
+        var response1 = calendarService.getYearlyEvents(year);
 //        var response = calendarService.fetchCalendarEvents(startDate, endDate, null);
         return ResponseEntity.status(200).body(response1);
     }
 
+    @GetMapping(value = "/dailyEvents")
+    @PreAuthorize(value = "hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public ResponseEntity<?> getEvent(@RequestParam(value = "year") Integer year, @RequestParam(value = "month") Integer month, @RequestParam(value = "day") Integer day) {
+        var response1 = calendarService.getEventsDay(year, month, day);
+        return ResponseEntity.status(200).body(response1);
+    }
+
+
     @PostMapping(value = "/createEvent")
     @PreAuthorize(value = "hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<?> createEvent(@RequestBody CreateEventRequestDTO createEventRequestDTO) {
-        ApiResponse<String> response = calendarService.cretaeEvent(createEventRequestDTO);
+        var response = calendarService.cretaeEvent(createEventRequestDTO);
         String url = calendarService.createGoogleCalendarEvent(createEventRequestDTO);
-        response.setObject(url);
+//        response.setObject(url);
         return ResponseEntity.status(response.isSuccess() ? 200 : 400).body(response);
     }
 

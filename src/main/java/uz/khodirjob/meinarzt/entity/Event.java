@@ -7,10 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import uz.khodirjob.meinarzt.entity.template.AbsEntity;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Set;
 
@@ -27,6 +24,8 @@ public class Event extends AbsEntity {
     private Timestamp startTime;
     private Timestamp endTime;
     private String timezone; //America/Los_Angele
-    @ManyToMany
-    private Set<User> attendees;
+    @ManyToOne
+    private User attendees;
+    @ManyToOne
+    private User owner;
 }

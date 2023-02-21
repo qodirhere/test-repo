@@ -18,6 +18,6 @@ public class CreateEventRequestDTO {
     private String startDateTime;
     private String endDateTime;
     private String timezone; //America/Los_Angele
-    private List<String> guests;
+    private String attendees;
     private String meetUrl;
 }
