@@ -22,8 +22,8 @@ public class GmailController {
     }
 
     @PostMapping("/verifyEmail")
-    public ResponseEntity<?> verifyEmail(@RequestParam String email, String confirmationCode) {
-        var response = gmailService.verifyEmail(email, confirmationCode);
+    public ResponseEntity<?> verifyEmail(@RequestParam String email, @RequestParam String password) {
+        var response = gmailService.verifyEmail(email, password);
         return ResponseEntity.status(200).body(response);
     }
 }
