@@ -5,11 +5,13 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import uz.khodirjob.meinarzt.config.GmailConfig;
+import uz.khodirjob.meinarzt.entity.User;
 import uz.khodirjob.meinarzt.payload.ApiResponse;
 import uz.khodirjob.meinarzt.repository.UserRepository;
 
 import java.util.Date;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +39,8 @@ public class GmailService {
 
 
     public ApiResponse<?> verifyEmail(String email, String confirmationCode) {
+
+
         if (userRepository.verifyConfirmationCode(email, confirmationCode))
             return new ApiResponse<>("Succes", true);
         else if (userRepository.existsByEmail(email))
