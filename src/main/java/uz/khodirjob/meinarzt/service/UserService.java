@@ -8,10 +8,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import uz.khodirjob.meinarzt.dto.RegisterDTO;
 import uz.khodirjob.meinarzt.entity.AuthProvider;
 import uz.khodirjob.meinarzt.entity.User;
 import uz.khodirjob.meinarzt.entity.enums.RoleEnum;
+import uz.khodirjob.meinarzt.payload.ApiResponse;
 import uz.khodirjob.meinarzt.repository.RoleRepository;
+import uz.khodirjob.meinarzt.repository.SpecialityRepository;
 import uz.khodirjob.meinarzt.repository.UserRepository;
 
 import java.util.Optional;
@@ -27,6 +30,8 @@ public class UserService {
 
     @Autowired
     private RoleRepository roleRepository;
+    @Autowired
+    private SpecialityRepository specialityRepository;
 
     /**
      * Save user information in DB
@@ -40,18 +45,18 @@ public class UserService {
         Optional<User> byEmail = userRepository.findByEmail(userInfo.getEmail());
         if (!byEmail.isPresent()) {
             user = new User();
+            user.setFirstName(userInfo.getName());
+            user.setImageUrl(userInfo.getPicture());
+            user.setRoles(roleRepository.findByName(RoleEnum.ROLE_USER).get());
         } else {
             user = byEmail.get();
         }
-        user.setEmail(userInfo.getEmail());
-        user.setFirstName(userInfo.getName());
         user.setEmailVerified(userInfo.getVerifiedEmail());
-        user.setImageUrl(userInfo.getPicture());
+        user.setEmail(userInfo.getEmail());
         user.setProvider(AuthProvider.google);
         user.setProviderId(userInfo.getId());
         user.setAccessToken(tokenResponse.getAccessToken());
         user.setRefreshToken(tokenResponse.getRefreshToken());
-        user.setRoles(roleRepository.findByName(RoleEnum.ROLE_USER).get());
 //        user.setGender();
         System.out.println("userInfo.getGender() = " + userInfo.getGender());
         System.out.println("userInfo.toString() = " + userInfo.toString());
@@ -74,4 +79,14 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public ApiResponse<?> editUser(RegisterDTO registerDTO) {
+        User currentUser = this.getCurrentUser();
+        currentUser.setEmail(registerDTO.getEmail());
+        currentUser.setFirstName(registerDTO.getFirstName());
+        currentUser.setGender(registerDTO.getGender());
+        currentUser.setLastName(registerDTO.getLastName());
+        currentUser.setSpeciality(specialityRepository.findById(registerDTO.getSpecialitysId()).get());
+        User save = userRepository.save(currentUser);
+        return new ApiResponse<>("Succes", true, save);
+    }
 }
