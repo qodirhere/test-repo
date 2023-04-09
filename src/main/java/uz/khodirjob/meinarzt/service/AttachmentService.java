@@ -25,11 +25,11 @@ import java.util.*;
 @Service
 public class AttachmentService {
 
-    //    private static final String uploadDirectory = "https://frantic-picture-production.up.railway.app/";
-    private static final String uploadDirectory = "src/main/resources/attachments";
+        private static final String uploadDirectory = "https://frantic-picture-production.up.railway.app/";
+//    private static final String uploadDirectory = "src/main/resources/attachments";
 
-            private static final String down = "http://localhost:8080/api/attachment/download/";
-//    private static final String down = "https://meinarzt-production.up.railway.app/api/attachment/download/";
+//            private static final String down = "http://localhost:8080/api/attachment/download/";
+    private static final String down = "https://meinarzt-production.up.railway.app/api/attachment/download/";
     private final AttachmentRepository attachmentRepository;
 
     private final UserRepository userRepository;
@@ -55,7 +55,7 @@ public class AttachmentService {
                 }
             }
         }
-        return new ApiResponse<>("Mana", true, attachPath);
+        return new ApiResponse<>("Upload", true, attachPath);
     }
 
 
